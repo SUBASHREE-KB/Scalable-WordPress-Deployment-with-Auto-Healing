@@ -1,0 +1,47 @@
+[
+    {
+      "ParameterKey": "AMI",
+      "ParameterValue": "ami-05b10e08d247fb927"
+    },
+    {
+      "ParameterKey": "InstanceType",
+      "ParameterValue": "t2.micro"
+    },
+    {
+      "ParameterKey": "KeyName",
+      "ParameterValue": "my-key-wp"
+    },
+    {
+      "ParameterKey": "SecurityGroup",
+      "ParameterValue": "sg-07d4dc10a219c040a"
+    },
+    {
+      "ParameterKey": "PrivateSubnet1",
+      "ParameterValue": "subnet-0e5a7eeca6173293d"
+    },
+    {
+      "ParameterKey": "PrivateSubnet2",
+      "ParameterValue": "subnet-0f1058ab504dc6c16"
+    },
+    {
+      "ParameterKey": "EFSId",
+      "ParameterValue": "fs-018715e8e30148105"
+    },
+    {
+      "ParameterKey": "RDSHost",
+      "ParameterValue": "wordpress-db.chcg6mmscjea.us-east-1.rds.amazonaws.com"
+    },
+    {
+      "ParameterKey": "DBName",
+      "ParameterValue": "wordpressdb"
+    },
+    {
+      "ParameterKey": "DBUsername",
+      "ParameterValue": "admin"
+    },
+    {
+      "ParameterKey": "DBPassword",
+      "ParameterValue": "admin123"
+    }
+  ]
+  

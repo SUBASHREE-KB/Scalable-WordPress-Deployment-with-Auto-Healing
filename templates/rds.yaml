@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: RDS MySQL Database for WordPress
+
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC ID where RDS will be deployed
+
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet::Id
+    Description: Private Subnet 1 ID for RDS Primary Instance
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet::Id
+    Description: Private Subnet 2 ID for RDS Standby Instance
+
+  DBUsername:
+    Type: String
+    Description: Database admin username
+    NoEcho: true
+
+  DBPassword:
+    Type: String
+    Description: Database admin password
+    NoEcho: true
+    MinLength: 8
+    MaxLength: 41
+
+  DBInstanceClass:
+    Type: String
+    Default: db.t3.micro
+    Description: Instance type for the RDS database
+
+  DBAllocatedStorage:
+    Type: Number
+    Default: 20
+    Description: Storage size in GB
+
+  DBName:
+    Type: String
+    Default: wordpressdb
+    Description: The name of the initial database
+
+  WordPressSG:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: Security Group ID of the WordPress EC2 instances
+
+Resources:
+  # Security Group for RDS Instance
+  RDSInstanceSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for RDS instance
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref WordPressSG  
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          CidrIp: 0.0.0.0/0 
+
+  # RDS Subnet Group
+  RDSDBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: wordpress-db-subnet-group
+      DBSubnetGroupDescription: Subnet group for RDS
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+
+  # RDS Instance
+  RDSInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: wordpress-db
+      Engine: MySQL
+      EngineVersion: "8.0"
+      DBInstanceClass: !Ref DBInstanceClass
+      AllocatedStorage: !Ref DBAllocatedStorage
+      DBName: !Ref DBName
+      MasterUsername: !Ref DBUsername
+      MasterUserPassword: !Ref DBPassword
+      VPCSecurityGroups:
+        - !Ref RDSInstanceSG  
+      DBSubnetGroupName: !Ref RDSDBSubnetGroup
+      MultiAZ: true
+      StorageType: gp2
+      PubliclyAccessible: false
+      BackupRetentionPeriod: 7
+      DeletionProtection: true
+
+Outputs:
+  RDSInstanceEndpoint:
+    Description: The endpoint for the RDS database
+    Value: !GetAtt RDSInstance.Endpoint.Address

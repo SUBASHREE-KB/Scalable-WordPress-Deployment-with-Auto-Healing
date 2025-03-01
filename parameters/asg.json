@@ -1,0 +1,19 @@
+[
+    {
+      "ParameterKey": "LaunchTemplateId",
+      "ParameterValue": "lt-00d581fbf524360e0"
+    },
+    {
+      "ParameterKey": "PrivateSubnet1",
+      "ParameterValue": "subnet-0e5a7eeca6173293d"
+    },
+    {
+      "ParameterKey": "PrivateSubnet2",
+      "ParameterValue": "subnet-0f1058ab504dc6c16"
+    },
+    {
+      "ParameterKey": "ALBTargetGroupArn",
+      "ParameterValue": "arn:aws:elasticloadbalancing:us-east-1:412381779024:targetgroup/WordPressTargetGroup/f847cb16c39e821a"
+    }
+  ]
+  

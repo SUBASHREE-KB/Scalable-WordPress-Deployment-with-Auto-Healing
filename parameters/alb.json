@@ -1,0 +1,19 @@
+[
+    {
+      "ParameterKey": "VpcId",
+      "ParameterValue": "vpc-056a6e597a27a459e"
+    },
+    {
+      "ParameterKey": "PublicSubnet1",
+      "ParameterValue": "subnet-0b5c57fa0bc3a1c4e"
+    },
+    {
+      "ParameterKey": "PublicSubnet2",
+      "ParameterValue": "subnet-0a63364f194876fc3"
+    },
+    {
+      "ParameterKey": "ALBSecurityGroup",
+      "ParameterValue": "sg-07d4dc10a219c040a"
+    }
+  ]
+  

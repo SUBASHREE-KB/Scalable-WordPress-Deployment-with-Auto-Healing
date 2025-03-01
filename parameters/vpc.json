@@ -1,0 +1,34 @@
+[
+  {
+    "ParameterKey": "VpcCidr",
+    "ParameterValue": "15.0.0.0/16"
+  },
+  {
+    "ParameterKey": "VpcName",
+    "ParameterValue": "my-wp-vpc"
+  },
+  {
+    "ParameterKey": "AvailabilityZone1",
+    "ParameterValue": "us-east-1a"
+  },
+  {
+    "ParameterKey": "AvailabilityZone2",
+    "ParameterValue": "us-east-1b"
+  },
+  {
+    "ParameterKey": "PublicSubnet1Cidr",
+    "ParameterValue": "15.0.10.0/23"
+  },
+  {
+    "ParameterKey": "PublicSubnet2Cidr",
+    "ParameterValue": "15.0.50.0/23"
+  },
+  {
+    "ParameterKey": "PrivateSubnet1Cidr",
+    "ParameterValue": "15.0.100.0/23"
+  },
+  {
+    "ParameterKey": "PrivateSubnet2Cidr",
+    "ParameterValue": "15.0.150.0/23"
+  }
+]

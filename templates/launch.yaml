@@ -1,0 +1,137 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Launch Template for WordPress EC2 instances with IAM Role for SSM
+Parameters:
+  AMI:
+    Type: String
+    Description: AMI ID for the EC2 instance
+  InstanceType:
+    Type: String
+    Default: t3.micro
+    Description: Instance type
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: KeyPair for SSH access
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: Security Group for EC2 instances
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet::Id
+    Description: Private Subnet 1 for EC2 instances
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet::Id
+    Description: Private Subnet 2 for EC2 instances
+  EFSId:
+    Type: String
+    Description: EFS File System ID
+  RDSHost:
+    Type: String
+    Description: RDS Endpoint
+  DBName:
+    Type: String
+    Description: Database name
+  DBUsername:
+    Type: String
+    Description: Database admin username
+  DBPassword:
+    Type: String
+    Description: Database admin password
+    NoEcho: true
+
+Resources:
+  # IAM Role for EC2 to enable SSM access
+  WordPressEC2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: WordPressEC2Role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: 
+                - ec2.amazonaws.com
+            Action: 
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore # Provides SSM access
+
+  # IAM Instance Profile to attach the role to EC2 instances
+  WordPressEC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: WordPressEC2InstanceProfile
+      Roles:
+        - !Ref WordPressEC2Role
+
+  # Launch Template for WordPress EC2 instances
+  WordPressLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: WordPressLaunchTemplate
+      LaunchTemplateData:
+        ImageId: !Ref AMI
+        InstanceType: !Ref InstanceType
+        KeyName: !Ref KeyName
+        SecurityGroupIds:
+          - !Ref SecurityGroup
+        IamInstanceProfile:
+          Name: !Ref WordPressEC2InstanceProfile  # Attach IAM role for SSM access
+        UserData:
+          Fn::Base64: !Sub |
+            #!/bin/bash
+            echo "Running User Data Script" >> /var/log/user-data.log
+            sudo yum update -y
+            sudo yum install -y httpd php php-mysqlnd
+
+            # Enable and start Apache
+            systemctl enable httpd
+            systemctl start httpd
+
+            # Mount EFS
+            sudo mkdir -p /var/www/html
+            sudo echo "${EFSId}:/ /var/www/html efs defaults,_netdev 0 0" >> /etc/fstab
+            sudo mount -a
+
+            # Download and setup WordPress
+            sudo cd /var/www/html
+            sudo wget https://wordpress.org/latest.tar.gz
+            sudo tar -xzf latest.tar.gz
+            sudo mv wordpress/* .
+            sudo rm -rf wordpress latest.tar.gz
+            sudo chown -R apache:apache /var/www/html
+            sudo chmod -R 755 /var/www/html
+
+            # Configure WordPress database settings
+            sudo cp wp-config-sample.php wp-config.php
+            sudo sed -i "s/database_name_here/${DBName}/" wp-config.php
+            sudo sed -i "s/username_here/${DBUsername}/" wp-config.php
+            sudo sed -i "s/password_here/${DBPassword}/" wp-config.php
+            sudo sed -i "s/localhost/${RDSHost}/" wp-config.php
+
+            # Restart Apache
+            sudo systemctl restart httpd
+  # Scaling Policy - Scale Out (Increase Instances when CPU > 70%)
+  ScaleOutPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AutoScalingGroupName: !Ref WordPressAutoScalingGroup
+      PolicyType: TargetTrackingScaling
+      TargetTrackingConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ASGAverageCPUUtilization
+        TargetValue: 70.0
+  # Scaling Policy - Scale In (Decrease Instances when CPU < 30%)
+  ScaleInPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AutoScalingGroupName: !Ref WordPressAutoScalingGroup
+      PolicyType: TargetTrackingScaling
+      TargetTrackingConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ASGAverageCPUUtilization
+        TargetValue: 30.0
+
+Outputs:
+  LaunchTemplateId:
+    Description: ID of the Launch Template
+    Value: !Ref WordPressLaunchTemplate

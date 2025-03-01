@@ -1,0 +1,18 @@
+[
+  {
+    "ParameterKey": "VpcId",
+    "ParameterValue": "vpc-056a6e597a27a459e"
+  },
+  {
+    "ParameterKey": "PrivateSubnet1",
+    "ParameterValue": "subnet-0e5a7eeca6173293d"
+  },
+  {
+    "ParameterKey": "PrivateSubnet2",
+    "ParameterValue": "subnet-0f1058ab504dc6c16"
+  },
+  {
+    "ParameterKey": "WordPressSG",
+    "ParameterValue": "sg-07d4dc10a219c040a"
+  }
+]

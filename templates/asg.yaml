@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Auto Scaling Group for WordPress
+Parameters:
+  LaunchTemplateId:
+    Type: String
+    Description: ID of the Launch Template
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet::Id
+    Description: Private Subnet 1
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet::Id
+    Description: Private Subnet 2
+  ALBTargetGroupArn:
+    Type: String
+    Description: ARN of the ALB Target Group
+
+Resources:
+  WordPressAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: WordPressASG
+      VPCZoneIdentifier:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      LaunchTemplate:
+        LaunchTemplateId: !Ref LaunchTemplateId
+        Version: "1"
+      MinSize: "2"
+      MaxSize: "4"
+      DesiredCapacity: "2"
+      TargetGroupARNs:
+        - !Ref ALBTargetGroupArn
+      HealthCheckType: EC2
+      HealthCheckGracePeriod: 300
+      Tags:
+        - Key: Name
+          Value: WordPressInstance
+          PropagateAtLaunch: true
+    
+Outputs:
+  AutoScalingGroupId:
+    Description: ID of the Auto Scaling Group
+    Value: !Ref WordPressAutoScalingGroup
